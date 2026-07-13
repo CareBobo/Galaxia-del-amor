@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galaxia de Amor</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        overflow-x: hidden;
+      }
+      #webgl {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Canvas 3D -->
+    <canvas id="webgl"></canvas>
+
+    <!-- Overlay para la transición (Pantallazo blanco/nubes) -->
+    <div id="fade-overlay"></div>
+
+    <!-- Botón de inicio -->
+    <button id="start-btn">Iniciar Viaje</button>
+
+    <!-- Video Cinemático Final -->
+    <video id="final-video" src="/carta de amor.mp4" playsinline controlsList="nodownload nofullscreen" preload="auto"></video>
+
+    <!-- Contenedor Scrollable para la Carta Final -->
+    <div id="letter-container">
+        <img id="final-letter-img" src="/carta de amor.png" alt="Carta de Amor" />
+    </div>
+
+    <!-- Modal para las Bolitas Flotantes -->
+    <div id="message-modal">
+        <div class="modal-content">
+            <img id="modal-img" src="/cute_love_bear.png" alt="Bear Love" />
+            <h2 id="modal-title">Título</h2>
+            <p id="modal-text">Mensaje de amor</p>
+            <button id="close-modal">CERRAR ✦</button>
+        </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
