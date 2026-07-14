@@ -16,6 +16,8 @@ const modalText = document.getElementById('modal-text');
 const modalImg = document.getElementById('modal-img');
 const closeModalBtn = document.getElementById('close-modal');
 const closeModalX = document.getElementById('close-modal-x');
+const closeLetterBtn = document.getElementById('close-letter-btn');
+const loveForeverText = document.getElementById('love-forever-text');
 
 // ==========================================================
 // CONFIGURACIÓN DE THREE.JS (ESCENA, CÁMARA, RENDERIZADOR)
@@ -666,6 +668,82 @@ if (closeModalX) {
   closeModalX.addEventListener('click', () => {
     modal.classList.remove('active');
   });
+}
+
+if (closeLetterBtn) {
+  closeLetterBtn.addEventListener('click', () => {
+    // 1. Animación GSAP para enrollar/desvanecer la carta hacia arriba
+    gsap.to('#final-letter-img', {
+      scaleY: 0,
+      transformOrigin: "top center",
+      opacity: 0,
+      duration: 1.2,
+      ease: "power2.inOut"
+    });
+    
+    // Ocultar el botón de cierre
+    gsap.to(closeLetterBtn, {
+      opacity: 0,
+      scale: 0.5,
+      duration: 0.6,
+      onComplete: () => {
+        closeLetterBtn.style.display = 'none';
+      }
+    });
+    
+    // 2. Revelar el texto "I LOVE YOU FOR EVER" y disparar explosión de corazones
+    gsap.delayedCall(1.0, () => {
+      if (loveForeverText) {
+        loveForeverText.style.display = 'block';
+        gsap.to(loveForeverText, {
+          opacity: 1,
+          scale: 1,
+          duration: 1.5,
+          ease: "back.out(1.7)"
+        });
+      }
+      
+      // Lanzar estallido de corazones
+      spawnLoveBurst();
+    });
+  });
+}
+
+function spawnLoveBurst() {
+  const container = document.getElementById('letter-container');
+  if (!container) return;
+  
+  const particleTypes = ['❤️', '💖', '✨', '💝', '🌸', '🦋'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.innerText = particleTypes[Math.floor(Math.random() * particleTypes.length)];
+    p.className = 'burst-particle';
+    
+    // Posición central (brota del centro)
+    p.style.left = '50vw';
+    p.style.top = '50vh';
+    
+    // Angulo y alcance radial
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 250 + 80;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance - 80; // Levantar levemente
+    
+    p.style.setProperty('--dx', dx + 'px');
+    p.style.setProperty('--dy', dy + 'px');
+    
+    const size = Math.random() * 20 + 16;
+    p.style.fontSize = size + 'px';
+    
+    const duration = Math.random() * 2.5 + 2.0;
+    p.style.animationDuration = duration + 's';
+    
+    container.appendChild(p);
+    
+    setTimeout(() => {
+      p.remove();
+    }, duration * 1000);
+  }
 }
 
 // ==========================================================
