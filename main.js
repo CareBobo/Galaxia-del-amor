@@ -56,14 +56,114 @@ const galaxyBg = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
 galaxyBg.position.set(0, -10, -50); 
 spaceGroup.add(galaxyBg);
 
+// Capa 1: Estrellas blancas rápidas (warp)
 const starsGeo = new THREE.BufferGeometry();
-const starsPos = new Float32Array(3000 * 3);
-for(let i=0; i<3000*3; i++) {
-    starsPos[i] = (Math.random() - 0.5) * 200;
+const STAR_COUNT = 4000;
+const starsPos = new Float32Array(STAR_COUNT * 3);
+const starsSizes = new Float32Array(STAR_COUNT);
+for(let i=0; i<STAR_COUNT; i++) {
+    starsPos[i*3]   = (Math.random() - 0.5) * 250;
+    starsPos[i*3+1] = (Math.random() - 0.5) * 250;
+    starsPos[i*3+2] = (Math.random() - 0.5) * 250;
+    starsSizes[i] = Math.random() * 0.15 + 0.03;
 }
 starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
-const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true, opacity: 0.8});
+starsGeo.setAttribute('size', new THREE.BufferAttribute(starsSizes, 1));
+const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.1, transparent: true, opacity: 0.85, sizeAttenuation: true});
 spaceGroup.add(new THREE.Points(starsGeo, starsMat));
+
+// Capa 2: Polvo cósmico de colores (partículas pequeñas de color)
+const dustGeo = new THREE.BufferGeometry();
+const DUST_COUNT = 2000;
+const dustPos = new Float32Array(DUST_COUNT * 3);
+const dustColors = new Float32Array(DUST_COUNT * 3);
+const dustPalette = [
+    [0.3, 0.7, 1.0],  // Azul cielo
+    [1.0, 0.4, 0.8],  // Rosa
+    [0.5, 0.2, 1.0],  // Púrpura
+    [1.0, 0.8, 0.3],  // Dorado
+    [0.2, 1.0, 0.6],  // Verde esmeralda
+];
+for(let i=0; i<DUST_COUNT; i++) {
+    dustPos[i*3]   = (Math.random() - 0.5) * 300;
+    dustPos[i*3+1] = (Math.random() - 0.5) * 200;
+    dustPos[i*3+2] = (Math.random() - 0.5) * 300;
+    const c = dustPalette[Math.floor(Math.random() * dustPalette.length)];
+    dustColors[i*3]   = c[0];
+    dustColors[i*3+1] = c[1];
+    dustColors[i*3+2] = c[2];
+}
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
+const dustMat = new THREE.PointsMaterial({size: 0.08, transparent: true, opacity: 0.6, vertexColors: true, sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false});
+spaceGroup.add(new THREE.Points(dustGeo, dustMat));
+
+// Capa 3: Nubes de Nebulosa (planos translúcidos con gradientes radiales)
+function createNebulaCloud(color, size, pos) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 256;
+    const ctx = c.getContext('2d');
+    const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grad.addColorStop(0, color);
+    grad.addColorStop(0.4, color.replace('0.35', '0.15'));
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+    const tex = new THREE.CanvasTexture(c);
+    const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(size, size),
+        new THREE.MeshBasicMaterial({map: tex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide})
+    );
+    mesh.position.copy(pos);
+    mesh.lookAt(camera.position);
+    return mesh;
+}
+
+const nebulaData = [
+    { color: 'rgba(100, 0, 255, 0.35)', size: 80, pos: new THREE.Vector3(-60, 20, -100) },
+    { color: 'rgba(255, 50, 150, 0.35)', size: 100, pos: new THREE.Vector3(70, -15, -130) },
+    { color: 'rgba(0, 180, 255, 0.35)', size: 70, pos: new THREE.Vector3(0, 30, -160) },
+    { color: 'rgba(255, 150, 0, 0.35)', size: 60, pos: new THREE.Vector3(-80, -25, -90) },
+];
+const nebulaClouds = [];
+nebulaData.forEach(n => {
+    const cloud = createNebulaCloud(n.color, n.size, n.pos);
+    spaceGroup.add(cloud);
+    nebulaClouds.push(cloud);
+});
+
+// Capa 4: Estrellas Fugaces (shooting stars con estela brillante)
+const shootingStarsData = [];
+function createShootingStar() {
+    const lineGeo = new THREE.BufferGeometry();
+    const points = [];
+    for(let i=0; i<20; i++) {
+        points.push(0, 0, -i * 0.8); // Estela de 16 unidades de largo
+    }
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+    const lineMat = new THREE.LineBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending});
+    const line = new THREE.Line(lineGeo, lineMat);
+    line.position.set(
+        (Math.random() - 0.5) * 160,
+        (Math.random() - 0.5) * 100,
+        -80 - Math.random() * 200
+    );
+    // Dirección diagonal aleatoria
+    const dirX = (Math.random() - 0.5) * 2;
+    const dirY = (Math.random() - 0.5) * 1;
+    spaceGroup.add(line);
+    return { mesh: line, speed: 2 + Math.random() * 3, dirX, dirY, life: 0, maxLife: 60 + Math.random() * 120 };
+}
+for(let i=0; i<8; i++) {
+    shootingStarsData.push(createShootingStar());
+}
+
+// Interactividad: Parallax con el mouse
+const mouseTarget = { x: 0, y: 0 };
+window.addEventListener('mousemove', (e) => {
+    mouseTarget.x = (e.clientX / sizes.width - 0.5) * 2;
+    mouseTarget.y = (e.clientY / sizes.height - 0.5) * 2;
+});
 
 // --- ELEMENTOS DE ALTA VELOCIDAD (Warp Speed) ---
 const meteorsData = [];
@@ -97,23 +197,47 @@ for(let i=0; i<25; i++) {
     meteorsData.push({ group: meteorGroup, rock: rock, fire: fire, speed: speed, rotSpeed: rotSpeed });
 }
 
-// Planetas pasantes decorativos
-const passingTextures = ['mars.jpg', 'uranus.jpg', 'neptune.jpg', 'venus.jpg', 'jupiter.jpg'];
-for(let i=0; i<6; i++) {
-    const texUrl = 'https://raw.githubusercontent.com/SoumyaEXE/3d-Solar-System-ThreeJS/master/public/textures/' + passingTextures[i % passingTextures.length];
-    const pMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(2 + Math.random() * 6, 32, 32),
-        new THREE.MeshStandardMaterial({ map: textureLoader.load(texUrl), roughness: 0.7 })
-    );
+// Elementos decorativos Pasantes: ESTILO NEON (Reducidos y más variados)
+const neonShapesData = [];
+const neonColors = [0x00ffff, 0xff00ff, 0xffff00, 0xff4400, 0x00ffaa, 0x8844ff, 0xff2288];
+
+for(let i=0; i<7; i++) {
+    const color = neonColors[i % neonColors.length];
+    const g = new THREE.Group();
     
-    pMesh.position.set(
-        (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 80), 
+    // Núcleo brillante
+    const coreSize = 1.0 + Math.random() * 2.5;
+    const core = new THREE.Mesh(
+        new THREE.SphereGeometry(coreSize, 24, 24),
+        new THREE.MeshBasicMaterial({color: color})
+    );
+    g.add(core);
+    
+    // Halo de resplandor (esfera más grande y translúcida)
+    const halo = new THREE.Mesh(
+        new THREE.SphereGeometry(coreSize * 2.5, 16, 16),
+        new THREE.MeshBasicMaterial({color: color, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false})
+    );
+    g.add(halo);
+    
+    // Anillo solo para algunos
+    if (i % 3 === 0) {
+        const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(coreSize * 2, 0.15, 12, 48),
+            new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.7})
+        );
+        ring.rotation.x = Math.PI / 2 + Math.random() * 0.5;
+        g.add(ring);
+    }
+    
+    g.position.set(
+        (Math.random() > 0.5 ? 1 : -1) * (25 + Math.random() * 90), 
         (Math.random() - 0.5) * 60,
-        -200 - Math.random() * 400
+        -150 - Math.random() * 400
     );
     
-    spaceGroup.add(pMesh);
-    passingPlanetsData.push({ mesh: pMesh, speed: 0.5 + Math.random() * 0.8 });
+    spaceGroup.add(g);
+    neonShapesData.push({ mesh: g, speed: 0.6 + Math.random() * 1.0, pulseOffset: Math.random() * Math.PI * 2, halo: halo, core: core });
 }
 
 const solarSystemGroup = new THREE.Group();
@@ -281,12 +405,15 @@ Promise.all(spritePromises).then((texturesData) => {
         const mat = new THREE.SpriteMaterial({ map: textureObj.texture, color: 0xeeeeee });
         const sprite = new THREE.Sprite(mat);
         
-        // Posición mezclada entre los planetas (Radio 12 a 35)
+        // Posición calculada matemáticamente para no salirse de la galaxia y no apilarse
         const angle = (index / texturesData.length) * Math.PI * 2;
-        const radius = 15 + Math.random() * 20; // Entre 15 y 35
+        // Distancias fijas intercaladas exactamente entre los planetas
+        const fixedRadii = [6, 8.5, 11.5, 14, 18.5, 23, 27];
+        const radius = fixedRadii[index % fixedRadii.length];
+        
         sprite.position.set(
             Math.cos(angle) * radius,
-            (Math.random() - 0.5) * 8, // Altura aleatoria
+            (Math.random() - 0.5) * 6, // Altura aleatoria suave para que no queden todas en el mismo plano 2D
             Math.sin(angle) * radius
         );
         
@@ -300,7 +427,7 @@ Promise.all(spritePromises).then((texturesData) => {
             message: textureObj.data.text, 
             angleOffset: angle, 
             radius: radius, 
-            speed: 0.5 + Math.random() * 0.5,
+            speed: 0.8, // VELOCIDAD FIJA para que todas giren juntas y NUNCA se alcancen ni apilen
             imgSrc: textureObj.src
         };
         
@@ -474,55 +601,86 @@ function tick() {
     
     if (spaceGroup.visible && isOrbiting) {
         // Efecto de avance a través del espacio (Warp Effect) Acelerado
-        if (typeof starsGeo !== 'undefined') {
-            const positions = starsGeo.attributes.position.array;
-            for (let i = 0; i < 3000; i++) {
-                positions[i * 3 + 2] += 0.8; // Velocidad x5!
-                if (positions[i * 3 + 2] > 70) {
-                    positions[i * 3 + 2] -= 200; 
-                }
+        const positions = starsGeo.attributes.position.array;
+        for (let i = 0; i < STAR_COUNT; i++) {
+            positions[i * 3 + 2] += 0.6;
+            if (positions[i * 3 + 2] > 100) {
+                positions[i * 3 + 2] -= 250; 
             }
-            starsGeo.attributes.position.needsUpdate = true;
         }
+        starsGeo.attributes.position.needsUpdate = true;
+
+        // Polvo cósmico de colores también avanza
+        const dPos = dustGeo.attributes.position.array;
+        for (let i = 0; i < DUST_COUNT; i++) {
+            dPos[i * 3 + 2] += 0.3;
+            if (dPos[i * 3 + 2] > 100) dPos[i * 3 + 2] -= 300;
+        }
+        dustGeo.attributes.position.needsUpdate = true;
+
+        // Nubes de nebulosa pulsan suavemente (respiran)
+        nebulaClouds.forEach((cloud, i) => {
+            const s = 1 + Math.sin(elapsedTime * 0.3 + i) * 0.08;
+            cloud.scale.set(s, s, 1);
+            cloud.lookAt(camera.position);
+        });
+
+        // Estrellas fugaces
+        shootingStarsData.forEach((ss, idx) => {
+            ss.mesh.position.x += ss.dirX * ss.speed;
+            ss.mesh.position.y += ss.dirY * ss.speed;
+            ss.mesh.position.z += ss.speed;
+            ss.life++;
+            ss.mesh.material.opacity = Math.max(0, 1 - ss.life / ss.maxLife);
+            if (ss.life >= ss.maxLife) {
+                // Reciclar estrella fugaz
+                ss.mesh.position.set(
+                    (Math.random() - 0.5) * 160,
+                    (Math.random() - 0.5) * 100,
+                    -80 - Math.random() * 200
+                );
+                ss.dirX = (Math.random() - 0.5) * 2;
+                ss.dirY = (Math.random() - 0.5) * 1;
+                ss.speed = 2 + Math.random() * 3;
+                ss.life = 0;
+                ss.maxLife = 60 + Math.random() * 120;
+                ss.mesh.material.opacity = 0.9;
+            }
+        });
 
         // Animar meteoros
-        if (typeof meteorsData !== 'undefined') {
-            meteorsData.forEach(m => {
-                m.group.position.z += m.speed;
-                m.rock.rotation.x += m.rotSpeed.x;
-                m.rock.rotation.y += m.rotSpeed.y;
-                
-                // Efecto de fuego titilante
-                m.fire.scale.x = 1 + Math.sin(elapsedTime * 30 + m.speed) * 0.3;
-                m.fire.scale.y = 1 + Math.random() * 0.5; // Estirar aleatoriamente la cola
-                
-                if (m.group.position.z > 80) {
-                    m.group.position.z = -150 - Math.random() * 200;
-                    m.group.position.x = (Math.random() - 0.5) * 120;
-                    m.group.position.y = (Math.random() - 0.5) * 80;
-                }
-            });
-        }
+        meteorsData.forEach(m => {
+            m.group.position.z += m.speed;
+            m.rock.rotation.x += m.rotSpeed.x;
+            m.rock.rotation.y += m.rotSpeed.y;
+            m.fire.scale.x = 1 + Math.sin(elapsedTime * 30 + m.speed) * 0.3;
+            m.fire.scale.y = 1 + Math.random() * 0.5;
+            if (m.group.position.z > 80) {
+                m.group.position.z = -150 - Math.random() * 200;
+                m.group.position.x = (Math.random() - 0.5) * 120;
+                m.group.position.y = (Math.random() - 0.5) * 80;
+            }
+        });
 
-        // Animar planetas pasantes
-        if (typeof passingPlanetsData !== 'undefined') {
-            passingPlanetsData.forEach(p => {
-                p.mesh.position.z += p.speed;
-                p.mesh.rotation.y += 0.005;
-                p.mesh.rotation.x += 0.002;
-                
-                if (p.mesh.position.z > 80) {
-                    p.mesh.position.z = -250 - Math.random() * 300;
-                    p.mesh.position.x = (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 80);
-                    p.mesh.position.y = (Math.random() - 0.5) * 60;
-                }
-            });
-        }
+        // Animar figuras de neón con pulso de respiración
+        neonShapesData.forEach(n => {
+            n.mesh.position.z += n.speed;
+            n.mesh.rotation.y += 0.008;
+            // Pulso del halo (respira)
+            if (n.halo) {
+                const pulse = 1 + Math.sin(elapsedTime * 2 + n.pulseOffset) * 0.3;
+                n.halo.scale.set(pulse, pulse, pulse);
+                n.halo.material.opacity = 0.08 + Math.sin(elapsedTime * 3 + n.pulseOffset) * 0.06;
+            }
+            if (n.mesh.position.z > 80) {
+                n.mesh.position.z = -250 - Math.random() * 300;
+                n.mesh.position.x = (Math.random() > 0.5 ? 1 : -1) * (25 + Math.random() * 90);
+                n.mesh.position.y = (Math.random() - 0.5) * 60;
+            }
+        });
         
         // Rotar suavemente el fondo de la galaxia para dar dinamismo
-        if (typeof galaxyBg !== 'undefined') {
-            galaxyBg.rotation.z -= 0.0003;
-        }
+        galaxyBg.rotation.z -= 0.0003;
 
         planetsData.forEach((pData, index) => {
             pData.orbitContainer.rotation.y += (0.002 - (index * 0.0002));
@@ -536,6 +694,12 @@ function tick() {
             sprite.position.x = Math.cos(sprite.userData.angleOffset) * sprite.userData.radius;
             sprite.position.z = Math.sin(sprite.userData.angleOffset) * sprite.userData.radius;
         });
+    }
+
+    // Parallax interactivo: la galaxia reacciona al movimiento del mouse
+    if (spaceGroup.visible && isOrbiting && typeof mouseTarget !== 'undefined') {
+        spaceGroup.rotation.y += (mouseTarget.x * 0.02 - spaceGroup.rotation.y) * 0.03;
+        spaceGroup.rotation.x += (-mouseTarget.y * 0.01 - spaceGroup.rotation.x) * 0.03;
     }
 
     camera.lookAt(cameraTarget);
