@@ -15,6 +15,7 @@ const modalTitle = document.getElementById('modal-title');
 const modalText = document.getElementById('modal-text');
 const modalImg = document.getElementById('modal-img');
 const closeModalBtn = document.getElementById('close-modal');
+const closeModalX = document.getElementById('close-modal-x');
 
 // ==========================================================
 // CONFIGURACIÓN DE THREE.JS (ESCENA, CÁMARA, RENDERIZADOR)
@@ -552,7 +553,7 @@ messageBalls.forEach(ball => {
     modal.classList.add('active');
   });
   
-  // Hover: Agranda el planeta en 3D, hace girar la etiqueta y dispara partículas
+  // Hover: Agranda el planeta en 3D, hace girar la etiqueta y dispara partículas (Escritorio)
   ball.addEventListener('mouseenter', () => {
     const planetObj = planetMap.get(ball);
     if (planetObj) {
@@ -571,7 +572,7 @@ messageBalls.forEach(ball => {
     hoverParticleIntervals.set(ball, intervalId);
   });
   
-  // Fin de Hover: Restaura la escala normal del planeta 3D
+  // Fin de Hover (Escritorio)
   ball.addEventListener('mouseleave', () => {
     const planetObj = planetMap.get(ball);
     if (planetObj) {
@@ -583,6 +584,39 @@ messageBalls.forEach(ball => {
       hoverParticleIntervals.delete(ball);
     }
   });
+
+  // Soporte táctil para Celulares (Sustituto de hover)
+  ball.addEventListener('touchstart', (e) => {
+    const planetObj = planetMap.get(ball);
+    if (planetObj) {
+      planetObj.isHovered = true;
+    }
+    
+    // Partículas iniciales al tocar
+    for (let i = 0; i < 8; i++) {
+      createHoverParticle(ball);
+    }
+    
+    // Flujo continuo
+    if (!hoverParticleIntervals.has(ball)) {
+      const intervalId = setInterval(() => {
+        createHoverParticle(ball);
+      }, 140);
+      hoverParticleIntervals.set(ball, intervalId);
+    }
+  }, { passive: true });
+  
+  ball.addEventListener('touchend', () => {
+    const planetObj = planetMap.get(ball);
+    if (planetObj) {
+      planetObj.isHovered = false;
+    }
+    
+    if (hoverParticleIntervals.has(ball)) {
+      clearInterval(hoverParticleIntervals.get(ball));
+      hoverParticleIntervals.delete(ball);
+    }
+  }, { passive: true });
 });
 
 // Función para crear partículas que flotan en pantalla
@@ -627,6 +661,12 @@ function createHoverParticle(ball) {
 closeModalBtn.addEventListener('click', () => {
   modal.classList.remove('active');
 });
+
+if (closeModalX) {
+  closeModalX.addEventListener('click', () => {
+    modal.classList.remove('active');
+  });
+}
 
 // ==========================================================
 // TRANSICIÓN INTERACTIVA AL HACER CLIC EN "INICIAR VIAJE"
