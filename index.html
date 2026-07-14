@@ -8,52 +8,56 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- Video de la Galaxia (Fondo en Loop) -->
-    <video id="galaxy-video" src="/galaxia inicio.mp4" autoplay muted loop playsinline preload="auto"></video>
+    <!-- Canvas de Tres Dimensiones para la Galaxia (Three.js) -->
+    <canvas id="galaxy-canvas"></canvas>
+    <div class="galaxy-vignette"></div>
 
-    <!-- Bolitas Flotantes de Mensajes (HTML sobre el video) -->
+    <!-- Bolitas Flotantes de Mensajes (Overlays Proyectados en 3D) -->
     <div id="orbiting-messages">
-      <div class="orbit-ring" style="--orbit-size: 20vmin; --duration: 40s; --delay: 0s;">
-        <div class="message-ball" data-title="🌹 Amoréa" data-text="El planeta donde nacen los sentimientos más puros del universo. Aquí el aire respira pasión y cada latido del corazón resuena con la fuerza de un amor infinito. En este mundo, nuestras miradas se cruzaron por primera vez y el destino quedó sellado. Un lugar donde siempre florece la ternura y la promesa de estar juntos para siempre." data-img="/bear_1.png">
-          <img src="/bear_1.png" alt="Amoréa" />
-          <span class="ball-title">🌹 Amoréa</span>
-        </div>
+      <div class="message-ball" id="ball-0" data-title="☄️ Mercurio" data-text="El planeta más cercano al fuego del Sol, donde nace la pasión más intensa y pura. Aquí el calor del universo resuena con la fuerza de un amor ardiente y eterno, que crece con cada latido de mi corazón." data-img="/cute_love_bear.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">☄️ Mercurio</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
-      <div class="orbit-ring" style="--orbit-size: 24vmin; --duration: 40s; --delay: -5.7s;">
-        <div class="message-ball" data-title="✨ Lunaria" data-text="Un mundo iluminado por una luna eterna donde viven las promesas de amor. Bajo su luz plateada, nuestros secretos más profundos y nuestros sueños más dulces toman forma. Es el refugio donde el tiempo se detiene para dejarnos disfrutar de cada abrazo. Una luna que es testigo de que este sentimiento jamás conocerá el final." data-img="/bear_2.png">
-          <img src="/bear_2.png" alt="Lunaria" />
-          <span class="ball-title">✨ Lunaria</span>
-        </div>
+      <div class="message-ball" id="ball-1" data-title="✨ Venus" data-text="El planeta brillante de la diosa del amor, resplandeciente e inalcanzable para otros. Su brillo eterno refleja la inmensa felicidad que me da despertar pensando en ti cada mañana y saber que existes." data-img="/bear_1.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">✨ Venus</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
-      <div class="orbit-ring" style="--orbit-size: 28vmin; --duration: 40s; --delay: -11.4s;">
-        <div class="message-ball" data-title="💫 Eternia" data-text="El planeta donde el amor no conoce el tiempo ni la distancia. Aquí comprendí que no importa lo lejos que estemos, nuestras almas siempre encontrarán el camino de regreso. Cada estrella en su cielo representa un recuerdo hermoso que hemos construido juntos. Este es nuestro universo privado, donde siempre seremos infinitos." data-img="/bear_3.png">
-          <img src="/bear_3.png" alt="Eternia" />
-          <span class="ball-title">💫 Eternia</span>
-        </div>
+      <div class="message-ball" id="ball-2" data-title="🌍 Tierra" data-text="Nuestro hogar sagrado en el universo, el único lugar donde la vida florece gracias a tu sonrisa. Aquí comprendí que no importa lo inmenso que sea el cosmos, nuestras almas están destinadas a estar unidas para siempre." data-img="/couple.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">🌍 Tierra</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
-      <div class="orbit-ring" style="--orbit-size: 32vmin; --duration: 40s; --delay: -17.1s;">
-        <div class="message-ball" data-title="❤️ Valenthera" data-text="El planeta del corazón valiente, donde dos almas destinadas se encuentran. Aquí aprendimos a superar todos los miedos y a luchar con fuerza por lo que sentimos. En sus tierras, el amor es la única ley y la sinceridad nuestro escudo. Juntos hemos demostrado que no hay desafío en la galaxia que nuestro cariño no pueda vencer." data-img="/bear_4.png">
-          <img src="/bear_4.png" alt="Valenthera" />
-          <span class="ball-title">❤️ Valenthera</span>
-        </div>
+      <div class="message-ball" id="ball-3" data-title="🔴 Marte" data-text="El planeta del fuego y la valentía, donde el amor es nuestro escudo más fuerte. Juntos hemos demostrado que no hay desafío, tormenta ni distancia en la galaxia que nuestro cariño no pueda vencer." data-img="/bear_4.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">🔴 Marte</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
-      <div class="orbit-ring" style="--orbit-size: 36vmin; --duration: 40s; --delay: -22.8s;">
-        <div class="message-ball" data-title="🧿 Aurelia" data-text="Un planeta dorado donde cada estrella guarda una historia de amor. Su brillo refleja la inmensa felicidad que me da despertar pensando en ti cada mañana. Caminar por sus senderos de luz es como navegar por la paz que solo tus besos me pueden dar. Una obra de arte cósmica diseñada exclusivamente para celebrar nuestra unión." data-img="/bear_1.png">
-          <img src="/bear_1.png" alt="Aurelia" />
-          <span class="ball-title">🧿 Aurelia</span>
-        </div>
+      <div class="message-ball" id="ball-4" data-title="🌀 Júpiter" data-text="El gran gigante protector de la galaxia, majestuoso y sabio. Así de grande y fuerte es el sentimiento que nos une, actuando como un escudo que cuida y abraza nuestro amor frente a cualquier tormenta cósmica." data-img="/bear_2.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">🌀 Júpiter</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
-      <div class="orbit-ring" style="--orbit-size: 40vmin; --duration: 40s; --delay: -28.5s;">
-        <div class="message-ball" data-title="🌙 Serenova" data-text="El mundo de la paz, la calma y el amor verdadero. Cuando la vida se vuelve un caos, solo necesito pensar en este lugar para encontrar la tranquilidad en tus brazos. Es el oasis donde nuestras diferencias se disuelven y solo queda la comprensión absoluta. Aquí nuestro amor crece sano, libre, fuerte y sereno como el universo." data-img="/bear_2.png">
-          <img src="/bear_2.png" alt="Serenova" />
-          <span class="ball-title">🌙 Serenova</span>
-        </div>
+      <div class="message-ball" id="ball-5" data-title="🪐 Saturno" data-text="El señor de los anillos de luz y cristales celestiales. Cada pequeña partícula brillante de sus anillos representa un recuerdo hermoso que hemos construido juntos y que brillará en el espacio por la eternidad." data-img="/bear_3.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">🪐 Saturno</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
-      <div class="orbit-ring" style="--orbit-size: 44vmin; --duration: 40s; --delay: -34.2s;">
-        <div class="message-ball" data-title="💎 Celestia" data-text="Un planeta celestial donde las almas conectadas por el destino se encuentran. Su atmósfera está llena de destellos que me recuerdan al brillo de tus ojos cuando sonríes. Este es el rincón sagrado donde prometimos cuidarnos en cada vida y en cada realidad. Nuestro amor es la joya más brillante y preciada de toda la creación." data-img="/bear_3.png">
-          <img src="/bear_3.png" alt="Celestia" />
-          <span class="ball-title">💎 Celestia</span>
-        </div>
+      <div class="message-ball" id="ball-6" data-title="💎 Urano" data-text="El planeta del hielo cristalino y el misterio celeste. En sus profundidades frías y brillantes, descubrí que tu amor es la energía y la luz que me guía en los momentos más oscuros de mi camino." data-img="/bear_1.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">💎 Urano</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
+      </div>
+      <div class="message-ball" id="ball-7" data-title="🔵 Neptuno" data-text="El gigante azul de los vientos eternos y los mares cósmicos profundos. Tan profundo, pacífico e incomprensiblemente inmenso como el amor que siento por ti en cada latido y pensamiento." data-img="/bear_2.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">🔵 Neptuno</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
+      </div>
+      <div class="message-ball" id="ball-8" data-title="❄️ Plutón" data-text="El pequeño planeta del borde de la galaxia, lejano, misterioso y silencioso. Nos enseña que no importa la distancia ni el frío del espacio, nuestro amor siempre se mantendrá firme, cálido y fiel." data-img="/bear_3.png">
+        <div class="planet-indicator"></div>
+        <span class="ball-title">❄️ Plutón</span>
+        <span class="ball-tooltip">✦ Explorar ✦</span>
       </div>
     </div>
 
@@ -63,8 +67,11 @@
     <!-- Botón de inicio -->
     <button id="start-btn">Iniciar Viaje</button>
 
-    <!-- Video Cinemático Final (Carta de Amor) -->
-    <video id="final-video" src="/carta de amor.mp4" playsinline controlsList="nodownload nofullscreen" preload="auto"></video>
+    <!-- Música de fondo para el viaje (inicia automáticamente tras el clic de viaje) -->
+    <audio id="travel-music" src="/musica de fondo.mp3" preload="auto" loop></audio>
+
+    <!-- Video Cinemático Final (Carta de Amor, silenciado para escuchar la música) -->
+    <video id="final-video" src="/carta de amor.mp4" muted playsinline controlsList="nodownload nofullscreen" preload="auto"></video>
 
     <!-- Contenedor Scrollable para la Carta Final -->
     <div id="letter-container">
@@ -78,6 +85,17 @@
             <h2 id="modal-title">Título</h2>
             <p id="modal-text">Mensaje de amor</p>
             <button id="close-modal">CERRAR ✦</button>
+        </div>
+    </div>
+
+    <!-- Overlay de Orientación para Celular (Forzar modo horizontal) -->
+    <div id="orientation-overlay">
+        <div class="orientation-content">
+            <div class="phone-icon-container">
+                <span class="phone-icon">📱</span>
+            </div>
+            <h2>Gira tu celular</h2>
+            <p>Esta experiencia cósmica se disfruta mejor en modo horizontal.</p>
         </div>
     </div>
 
