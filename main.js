@@ -18,6 +18,7 @@ const closeModalBtn = document.getElementById('close-modal');
 const closeModalX = document.getElementById('close-modal-x');
 const closeLetterBtn = document.getElementById('close-letter-btn');
 const loveForeverText = document.getElementById('love-forever-text');
+const returnBtn = document.getElementById('return-btn');
 
 // ==========================================================
 // CONFIGURACIÓN DE THREE.JS (ESCENA, CÁMARA, RENDERIZADOR)
@@ -691,7 +692,7 @@ if (closeLetterBtn) {
       }
     });
     
-    // 2. Revelar el texto "I LOVE YOU FOR EVER" y disparar explosión de corazones
+    // 2. Revelar el texto "I LOVE YOU FOR EVER" y el botón de volver
     gsap.delayedCall(1.0, () => {
       if (loveForeverText) {
         loveForeverText.style.display = 'block';
@@ -703,9 +704,74 @@ if (closeLetterBtn) {
         });
       }
       
+      if (returnBtn) {
+        returnBtn.style.display = 'block';
+        gsap.to(returnBtn, {
+          opacity: 1,
+          scale: 1,
+          duration: 1.5,
+          delay: 0.35,
+          ease: "back.out(1.7)"
+        });
+      }
+      
       // Lanzar estallido de corazones
       spawnLoveBurst();
     });
+  });
+}
+
+if (returnBtn) {
+  returnBtn.addEventListener('click', () => {
+    // 1. Detener e reiniciar música de fondo y video final
+    const travelMusic = document.getElementById('travel-music');
+    if (travelMusic) {
+      travelMusic.pause();
+      travelMusic.currentTime = 0;
+    }
+    
+    finalVideo.pause();
+    finalVideo.currentTime = 0;
+    finalVideo.style.opacity = '0';
+    
+    // 2. Ocultar el contenedor de la carta y reiniciar los estados visuales internos
+    const letterContainer = document.getElementById('letter-container');
+    if (letterContainer) {
+      letterContainer.style.opacity = '0';
+      letterContainer.style.pointerEvents = 'none';
+    }
+    
+    // Resetear transformaciones GSAP de la carta
+    gsap.set('#final-letter-img', { scaleY: 1, opacity: 1 });
+    
+    // Volver a mostrar el botón de cerrar carta
+    closeLetterBtn.style.display = 'block';
+    closeLetterBtn.style.opacity = '1';
+    closeLetterBtn.style.transform = 'scale(1)';
+    
+    // Ocultar textos finales
+    loveForeverText.style.display = 'none';
+    loveForeverText.style.opacity = '0';
+    returnBtn.style.display = 'none';
+    returnBtn.style.opacity = '0';
+    
+    // 3. Resetear variables de simulación orbital y de viaje
+    starSpeedMultiplier = 1.0;
+    isTransitioning = false;
+    
+    // 4. Restaurar lienzo 3D y cámara
+    canvas.style.display = 'block';
+    camera.position.set(0, 68, 140);
+    camera.lookAt(0, 0, 0);
+    
+    // Reiniciar loop 3D
+    lastTime = performance.now();
+    tick();
+    
+    // 5. Devolver la interfaz orbital HTML (Botón e información)
+    startBtn.style.display = 'block';
+    gsap.to(startBtn, { opacity: 1, duration: 0.8 });
+    gsap.to(orbitingMessages, { opacity: 1, duration: 0.8, pointerEvents: 'auto' });
   });
 }
 

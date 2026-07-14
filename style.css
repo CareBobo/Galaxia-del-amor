@@ -580,3 +580,35 @@ body {
     opacity: 0;
   }
 }
+
+#return-btn {
+  display: none;
+  margin: 0 auto;
+  position: absolute;
+  top: 62vh; /* Colocado debajo de "I LOVE YOU FOR EVER" */
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-family: var(--font-cinematic);
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  z-index: 80;
+  text-transform: uppercase;
+}
+
+#return-btn:hover {
+  background: #ffffff;
+  color: #0a0514;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+  transform: translate(-50%, -50%) scale(1.05);
+}
